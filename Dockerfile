@@ -1,15 +1,13 @@
-FROM golang:1.24 AS build
+FROM golang:1.21
 
 WORKDIR /app
+
+COPY go.mod go.sum ./
+RUN go mod download
+
 COPY . .
 
-# Build binary tĩnh
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o app .
 
-# Runtime image nhỏ, không cần libc
-FROM scratch
+RUN go build -o app .
 
-WORKDIR /app
-COPY --from=build /app/app .
-
-ENTRYPOINT ["/app/app"]
+CMD ["./app"]
