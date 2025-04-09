@@ -1,12 +1,15 @@
-FROM golang:1.21-buster AS build
+# Build stage
+FROM golang:1.21.13-bullseye AS build
 
 WORKDIR /app
-COPY . .
-
+COPY go.mod go.sum ./
 RUN go mod download
+
+COPY . .
 RUN go build -o app .
 
-FROM debian:buster
+# Run stage
+FROM debian:bullseye-slim
 
 WORKDIR /app
 COPY --from=build /app/app .
