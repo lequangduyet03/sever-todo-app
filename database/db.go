@@ -21,18 +21,25 @@ func InitDB() (*sql.DB, error) {
 	dbUser := os.Getenv("DB_USER")
 	dbPassword := os.Getenv("DB_PASSWORD")
 	dbHost := os.Getenv("DB_HOST")
+	dbPort := os.Getenv("DB_PORT")
 	dbName := os.Getenv("DB_NAME")
 
-	
+	if dbPort == "" {
+		dbPort = "3306" // Cổng mặc định của MySQL
+	}
+
 	if dbUser == "" || dbPassword == "" || dbHost == "" || dbName == "" {
 		return nil, fmt.Errorf("thiếu biến môi trường bắt buộc: DB_USER, DB_PASSWORD, DB_HOST hoặc DB_NAME")
 	}
+
+	addr := fmt.Sprintf("%s:%s", dbHost, dbPort)
+	log.Printf("Đang cố gắng kết nối đến MySQL tại %s...", addr)
 
 	cfg := mysql.Config{
 		User:   dbUser,
 		Passwd: dbPassword,
 		Net:    "tcp",
-		Addr:   dbHost,
+		Addr:   addr,
 		DBName: dbName,
 		Params: map[string]string{
 			"parseTime": "true",
@@ -52,7 +59,7 @@ func InitDB() (*sql.DB, error) {
 		return nil, fmt.Errorf("lỗi kết nối cơ sở dữ liệu: %v", err)
 	}
 
-	log.Println("Đã kết nối thành công đến cơ sở dữ liệu!")
+	log.Println("✅ Đã kết nối thành công đến cơ sở dữ liệu!")
 	DB = db
 	return db, nil
 }
