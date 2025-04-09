@@ -1,16 +1,15 @@
-FROM golang:1.24.0 AS build
+FROM golang:1.24 AS build
 
 WORKDIR /app
-COPY go.mod go.sum ./
-RUN go mod download
-
 COPY . .
-RUN go build -o app .
 
-# Run stage
-FROM debian:bullseye-slim
+# Build binary tĩnh
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o app .
+
+# Runtime image nhỏ, không cần libc
+FROM scratch
 
 WORKDIR /app
 COPY --from=build /app/app .
 
-CMD ["./app"]
+ENTRYPOINT ["/app/app"]
